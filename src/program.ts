@@ -26,28 +26,29 @@ import { resolveConfig } from './config';
 const packageJSON = require('../package.json');
 
 program
-    .version('Version ' + packageJSON.version)
-    .name(packageJSON.name)
-    .option('--browser <browser>', 'Browser or chrome channel to use, possible values: chrome, firefox, webkit, msedge.')
-    .option('--caps <caps>', 'Comma-separated list of capabilities to enable, possible values: tabs, pdf, history, wait, files, install. Default is all.')
-    .option('--cdp-endpoint <endpoint>', 'CDP endpoint to connect to.')
-    .option('--executable-path <path>', 'Path to the browser executable.')
-    .option('--headless', 'Run browser in headless mode, headed by default')
-    .option('--user-data-dir <path>', 'Path to the user data directory')
-    .option('--port <port>', 'Port to listen on for SSE transport.')
-    .option('--host <host>', 'Host to bind server to. Default is localhost. Use 0.0.0.0 to bind to all interfaces.')
-    .option('--vision', 'Run server that uses screenshots (Aria snapshots are used by default)')
-    .option('--config <path>', 'Path to the configuration file.')
-    .action(async options => {
-      const config = await resolveConfig(options);
-      const serverList = new ServerList(() => createServer(config));
-      setupExitWatchdog(serverList);
+  .version('Version ' + packageJSON.version)
+  .name(packageJSON.name)
+  .option('--browser <browser>', 'Browser or chrome channel to use, possible values: chrome, firefox, webkit, msedge.')
+  .option('--caps <caps>', 'Comma-separated list of capabilities to enable, possible values: tabs, pdf, history, wait, files, install. Default is all.')
+  .option('--cdp-endpoint <endpoint>', 'CDP endpoint to connect to.')
+  .option('--cdp-header <header...>', 'Header(s) to send with CDP connection (e.g., "Authorization: Bearer key"). Can be used multiple times.')
+  .option('--executable-path <path>', 'Path to the browser executable.')
+  .option('--headless', 'Run browser in headless mode, headed by default')
+  .option('--user-data-dir <path>', 'Path to the user data directory')
+  .option('--port <port>', 'Port to listen on for SSE transport.')
+  .option('--host <host>', 'Host to bind server to. Default is localhost. Use 0.0.0.0 to bind to all interfaces.')
+  .option('--vision', 'Run server that uses screenshots (Aria snapshots are used by default)')
+  .option('--config <path>', 'Path to the configuration file.')
+  .action(async options => {
+    const config = await resolveConfig(options);
+    const serverList = new ServerList(() => createServer(config));
+    setupExitWatchdog(serverList);
 
-      if (options.port)
-        startHttpTransport(+options.port, options.host, serverList);
-      else
-        await startStdioTransport(serverList);
-    });
+    if (options.port)
+      startHttpTransport(+options.port, options.host, serverList);
+    else
+      await startStdioTransport(serverList);
+  });
 
 function setupExitWatchdog(serverList: ServerList) {
   const handleExit = async () => {

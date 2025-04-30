@@ -171,8 +171,8 @@ ${code.join('\n')}
       result.push('### Current tab');
 
     result.push(
-        `- Page URL: ${tab.page.url()}`,
-        `- Page Title: ${await tab.page.title()}`
+      `- Page URL: ${tab.page.url()}`,
+      `- Page Title: ${await tab.page.title()}`
     );
 
     if (captureSnapshot && tab.hasSnapshot())
@@ -259,7 +259,7 @@ ${code.join('\n')}
 
     await browserContext?.close().then(async () => {
       await browser?.close();
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   private async _ensureBrowserContext() {
@@ -293,7 +293,9 @@ ${code.join('\n')}
     }
 
     if (this.config.browser?.cdpEndpoint) {
-      const browser = await playwright.chromium.connectOverCDP(this.config.browser.cdpEndpoint);
+      const browser = await playwright.chromium.connectOverCDP(this.config.browser.cdpEndpoint, {
+        headers: this.config.browser?.cdpHeaders
+      });
       const browserContext = browser.contexts()[0];
       return { browser, browserContext };
     }

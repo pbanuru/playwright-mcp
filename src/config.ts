@@ -28,6 +28,7 @@ export type CLIOptions = {
   browser?: string;
   caps?: string;
   cdpEndpoint?: string;
+  cdpHeader?: string[];
   executablePath?: string;
   headless?: boolean;
   userDataDir?: string;
@@ -93,12 +94,28 @@ export async function configFromCLIOptions(cliOptions: CLIOptions): Promise<Conf
   if (browserName === 'chromium')
     (launchOptions as any).webSocketPort = await findFreePort();
 
+  // Parse headers
+  const cdpHeaders: Record<string, string> = {};
+  if (cliOptions.cdpHeader) {
+    for (const header of cliOptions.cdpHeader) {
+      const splitIndex = header.indexOf(':');
+      if (splitIndex === -1 || splitIndex === 0 || splitIndex === header.length - 1) {
+        console.warn(`Ignoring improperly formatted header: ${header}`);
+        continue;
+      }
+      const key = header.substring(0, splitIndex).trim();
+      const value = header.substring(splitIndex + 1).trim();
+      cdpHeaders[key] = value;
+    }
+  }
+
   return {
     browser: {
       browserName,
       userDataDir: cliOptions.userDataDir ?? await createUserDataDir({ browserName, channel }),
       launchOptions,
       cdpEndpoint: cliOptions.cdpEndpoint,
+      cdpHeaders: cdpHeaders,
     },
     server: {
       port: cliOptions.port,
