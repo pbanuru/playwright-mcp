@@ -180,8 +180,8 @@ ${code.join('\n')}
       result.push('### Current tab');
 
     result.push(
-        `- Page URL: ${tab.page.url()}`,
-        `- Page Title: ${await tab.page.title()}`
+      `- Page URL: ${tab.page.url()}`,
+      `- Page Title: ${await tab.page.title()}`
     );
 
     if (captureSnapshot && tab.hasSnapshot())
@@ -268,7 +268,7 @@ ${code.join('\n')}
 
     await browserContext?.close().then(async () => {
       await browser?.close();
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   private async _ensureBrowserContext() {
@@ -371,7 +371,7 @@ export class Tab {
   async navigate(url: string) {
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
     // Cap load event to 5 seconds, the page is operational at this point.
-    await this.page.waitForLoadState('load', { timeout: 5000 }).catch(() => {});
+    await this.page.waitForLoadState('load', { timeout: 5000 }).catch(() => { });
   }
 
   hasSnapshot(): boolean {
@@ -426,7 +426,7 @@ class PageSnapshot {
 
   private async _snapshotFrame(frame: playwright.Page | playwright.FrameLocator) {
     const frameIndex = this._frameLocators.push(frame) - 1;
-    const snapshotString = await frame.locator('body').ariaSnapshot({ ref: true, emitGeneric: true });
+    const snapshotString = await frame.locator('body').ariaSnapshot({ ref: true });
     const snapshot = yaml.parseDocument(snapshotString);
 
     const visit = async (node: any): Promise<unknown> => {

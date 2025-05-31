@@ -114,6 +114,7 @@ export async function createServer(config?: Config): Promise<Server> {
     userDataDir,
     launchOptions,
     cdpEndpoint: config?.browser?.cdpEndpoint,
+    remoteEndpoint: config?.browser?.remoteEndpoint,
   });
 }
 
