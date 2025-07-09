@@ -19,6 +19,7 @@ import assert from 'node:assert';
 import crypto from 'node:crypto';
 
 import { ServerList } from './server';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -27,6 +28,9 @@ export async function startStdioTransport(serverList: ServerList) {
   const server = await serverList.create();
   await server.connect(new StdioServerTransport());
 }
+
+// Global server instance to prevent multiple browser windows
+let globalServer: Server | null = null;
 
 async function handleSSE(req: http.IncomingMessage, res: http.ServerResponse, url: URL, serverList: ServerList, sessions: Map<string, SSEServerTransport>) {
   if (req.method === 'POST') {
@@ -46,10 +50,17 @@ async function handleSSE(req: http.IncomingMessage, res: http.ServerResponse, ur
   } else if (req.method === 'GET') {
     const transport = new SSEServerTransport('/sse', res);
     sessions.set(transport.sessionId, transport);
-    const server = await serverList.create();
+    
+    // Reuse global server or create new one
+    if (!globalServer) {
+      globalServer = await serverList.create();
+    }
+    const server = globalServer;
+    
     res.on('close', () => {
       sessions.delete(transport.sessionId);
-      serverList.close(server).catch(e => console.error(e));
+      // Don't auto-close browser when connection ends - let user control with browser_close tool
+      // serverList.close(server).catch(e => console.error(e));
     });
     return await server.connect(transport);
   }
